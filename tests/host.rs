@@ -23,7 +23,7 @@ fn test_allowed_hosts() {
     let req = client
         .get("/")
         .header(Host {
-                    hostname: "localhost".to_owned(),
+                    hostname: "localhost".into(),
                     port: 8000.into(),
                 });
     let response = req.dispatch();
@@ -40,7 +40,7 @@ fn test_not_allowed_hosts() {
     let req = client
         .get("/")
         .header(Host {
-                    hostname: "example.com".to_owned(),
+                    hostname: "example.com".into(),
                     port: None,
                 });
     let mut response = req.dispatch();
@@ -74,7 +74,7 @@ fn test_allowed_hosts_with_host_proxy_header_no_proxy_header() {
     let req = client
         .get("/")
         .header(Host {
-                    hostname: "example.com".to_owned(),
+                    hostname: "example.com".into(),
                     port: None,
                 });
     let response = req.dispatch();
@@ -94,7 +94,7 @@ fn test_not_allowed_hosts_with_host_proxy_header_no_proxy_header() {
     let req = client
         .get("/")
         .header(Host {
-                    hostname: "example.com".to_owned(),
+                    hostname: "example.com".into(),
                     port: None,
                 });
     let mut response = req.dispatch();
@@ -115,7 +115,7 @@ fn test_allowed_hosts_with_host_proxy_header() {
     let req = client
         .get("/")
         .header(Host {
-                    hostname: "example.com".to_owned(),
+                    hostname: "example.com".into(),
                     port: None,
                 })
         .header(Header::new("X-Forwarded-Host", "foo.example.com"));
@@ -137,7 +137,7 @@ fn test_allowed_hosts_with_host_proxy_header_allowed_proxy() {
     let req = client
         .get("/")
         .header(Host {
-                    hostname: "foo.example.com".to_owned(),
+                    hostname: "foo.example.com".into(),
                     port: None,
                 })
         .header(Header::new("X-Forwarded-Host", "example.com"));
@@ -159,7 +159,7 @@ fn test_not_allowed_hosts_with_host_proxy_header() {
     let req = client
         .get("/")
         .header(Host {
-                    hostname: "foo.example.com".to_owned(),
+                    hostname: "foo.example.com".into(),
                     port: None,
                 })
         .header(Header::new("X-Forwarded-Host", "bar.example.com"));

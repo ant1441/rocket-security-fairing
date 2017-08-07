@@ -301,17 +301,9 @@ impl<'a> Security<'a> {
 
     fn set_frame_options(&self, _request: &Request, response: &mut Response) {
         if let Some(frame_options) = self.frame_options {
-            match *frame_options {
-                XFrameOptions::Deny => response.set_raw_header("X-Frame-Options", "DENY"),
-                XFrameOptions::SameOrigin => {
-                    response.set_raw_header("X-Frame-Options", "SAMEORIGIN")
-                }
-                XFrameOptions::AllowFrom(ref host) => {
-                    response.set_raw_header("X-Frame-Options", format!("ALLOW-FROM {}", host))
-                }
-            };
+                response.set_raw_header("X-Frame-Options", frame_options.to_string());
         } else if self.frame_deny {
-            response.set_raw_header("X-Frame-Options", "DENY");
+            response.set_raw_header("X-Frame-Options", XFrameOptions::Deny.to_string());
         }
     }
 
@@ -320,14 +312,9 @@ impl<'a> Security<'a> {
             response.set_raw_header("X-Content-Type-Options", "nosniff");
         }
         if let Some(xss_filter) = self.custom_browser_xss_value {
-            match *xss_filter  {
-                XSSProtection::Disabled => response.set_raw_header("X-XSS-Protection", "0"),
-                XSSProtection::Enabled => response.set_raw_header("X-XSS-Protection", "1"),
-                XSSProtection::Block => response.set_raw_header("X-XSS-Protection", "1; mode=block"),
-                XSSProtection::Report(ref target) => response.set_raw_header("X-XSS-Protection", format!("1; report={}", target)),
-            };
+            response.set_raw_header("X-XSS-Protection", xss_filter.to_string());
         } else if self.browser_xss_filter {
-            response.set_raw_header("X-XSS-Protection", "1; mode=block");
+            response.set_raw_header("X-XSS-Protection", XSSProtection::Block.to_string());
         }
         if let Some(csp) = self.raw_content_security_policy {
             response.set_raw_header("Content-Security-Policy", csp.to_owned());
