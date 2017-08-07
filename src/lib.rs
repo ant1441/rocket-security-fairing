@@ -1,3 +1,86 @@
+//! A fairing for the Rust web framework [Rocket](https://rocket.rs), inspired by the golang library [Secure](https://github.com/unrolled/secure).
+//! rocket-security-fairing allows you to enable various options to increase the security of your application.
+//!
+//! ```rust,no_run
+//! #![feature(plugin)]
+//! #![plugin(rocket_codegen)]
+//!
+//! extern crate rocket;
+//! extern crate rocket_security;
+//!
+//! #[get("/<name>/<age>")]
+//! fn hello(name: String, age: u8) -> String {
+//!     format!("Hello, {} year old named {}!", age, name)
+//! }
+//!
+//! fn main() {
+//!     let security = rocket_security::Security::new()
+//!         .ssl_redirect()
+//!         .sts_seconds(31536000)
+//!         .sts_include_subdomains()
+//!         .frame_deny()
+//!         .no_sniff()
+//!         .xss_block()
+//!         .set_raw_content_security_policy("default-src 'self'")
+//!         .referrer_policy(rocket_security::ReferrerPolicy::Origin);
+//!     rocket::ignite()
+//!         .attach(security)
+//!         .mount("/hello", routes![hello])
+//!         .launch();
+//! }
+//! ```
+//!
+//! # Installation
+//!
+//! Add the following to your `Cargo.toml`
+//!
+//! ```toml
+//! rocket_security = { git = "https://github.com/ant1441/rocket-security-fairing", branch = "master" }
+//! ```
+//!
+//! # Usage
+//!
+//! To use rocket-security-fairing, you must construct an instance of the [`Security`](struct.Security.html) struct with your settings,
+//! and [`attach`](https://api.rocket.rs/rocket/struct.Rocket.html#method.attach) it to your rocket
+//! application.
+//!
+//! ```rust
+//! # extern crate rocket;
+//! # extern crate rocket_security;
+//! #
+//! # pub fn main() {
+//! let security = rocket_security::Security::new();
+//! rocket::ignite().attach(security);
+//! # }
+//! ```
+//!
+//! To configure the [`Security`](struct.Security.html) struct, use the builder pattern methods
+//! available on it, for example to configure [Strict Transport
+//! Security](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security)
+//! with a max age of 31536000 seconds
+//!
+//! ```rust
+//! # extern crate rocket;
+//! # extern crate rocket_security;
+//! #
+//! # pub fn main() {
+//! let security = rocket_security::Security::new()
+//!     .sts_seconds(31536000);
+//! rocket::ignite().attach(security);
+//! # }
+//! ```
+//!
+//! ```bash
+//! $ curl -i http://localhost:8000
+//! HTTP/1.1 200 OK
+//! Content-Type: text/plain; charset=utf-8
+//! Server: Rocket
+//! Strict-Transport-Security: max-age=31536000
+//! Content-Length: 11
+//! Date: Sun, 06 Aug 2017 20:43:01 GMT
+//! ```
+//!
+//! See the [`Security`](struct.Security.html) documentation for more options.
 extern crate rocket;
 
 use rocket::{Request, Response};
@@ -51,8 +134,8 @@ pub struct Security<'a> {
     browser_xss_filter: bool,
     /// custom_browser_xss_value allows the X-XSS-Protection header value to be set with a custom value. This overrides the browser_xss_filter option.
     custom_browser_xss_value: Option<&'a XSSProtection<'a>>,
-    /// content_security_policy allows the Content-Security-Policy header value to be set with a custom value.
-    content_security_policy: Option<&'a str>, // [TODO]: Custom type?
+    /// raw_content_security_policy allows the Content-Security-Policy header value to be set with a custom value.
+    raw_content_security_policy: Option<&'a str>, // [TODO]: Custom type?
     /// public_key sets HTTP Public Key Pinning to decrease the risk of MITM attacks with forged certificates.
     public_key: Option<&'a str>, // [TODO]: Custom type?
     /// referrer_policy enables the Referrer-Policy header with the value to be set with a custom value.
@@ -79,7 +162,7 @@ impl<'a> Security<'a> {
             content_type_nosniff: false,
             browser_xss_filter: false,
             custom_browser_xss_value: None,
-            content_security_policy: None,
+            raw_content_security_policy: None,
             public_key: None,
             referrer_policy: None,
         }
@@ -246,7 +329,7 @@ impl<'a> Security<'a> {
         } else if self.browser_xss_filter {
             response.set_raw_header("X-XSS-Protection", "1; mode=block");
         }
-        if let Some(csp) = self.content_security_policy {
+        if let Some(csp) = self.raw_content_security_policy {
             response.set_raw_header("Content-Security-Policy", csp.to_owned());
         }
     }

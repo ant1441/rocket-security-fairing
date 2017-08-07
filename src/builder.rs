@@ -123,9 +123,9 @@ impl<'a> Security<'a> {
         self
     }
 
-    pub fn set_content_security_policy(mut self, policy: &'a str) -> Self {
+    pub fn set_raw_content_security_policy(mut self, policy: &'a str) -> Self {
         self.enabled = true;
-        self.content_security_policy = Some(policy);
+        self.raw_content_security_policy = Some(policy);
         self
     }
 
@@ -176,6 +176,7 @@ mod tests {
             .frame_options(&FRAME_OPTIONS)
             .no_sniff()
             .xss_filter(&XSS_OPTION)
+            .set_raw_content_security_policy("default-src 'self'")
             .set_public_key_pin(&PUBLIC_KEY_PIN)
             .referrer_policy(referrer_policy);
     }

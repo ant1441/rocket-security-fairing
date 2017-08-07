@@ -120,7 +120,7 @@ fn test_xss_protection_custom_report() {
 fn test_csp() {
     static CONTENT_SECURITY_POLICY: &str = "default-src 'self' *.trusted.com";
 
-    let security = Security::new().set_content_security_policy(&CONTENT_SECURITY_POLICY);
+    let security = Security::new().set_raw_content_security_policy(&CONTENT_SECURITY_POLICY);
     let client = create_client(security);
 
     let req = client.get("/");
