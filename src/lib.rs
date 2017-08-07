@@ -102,6 +102,9 @@ pub use referrer_policy::ReferrerPolicy;
 // use rocket::http::hyper::header::StrictTransportSecurity;
 static STRICT_TRANSPORT_SECURITY: &str = "Strict-Transport-Security";
 
+/// The `Security` struct implements
+/// [rocket::Fairing](https://api.rocket.rs/rocket/fairing/trait.Fairing.html)
+/// to add the relevant headers to responses.
 pub struct Security<'a> {
     enabled: bool, // [TODO]: Remove `enabled`
     /// allowed_hosts is a list of fully qualified domain names that are allowed. Default is empty list, which allows any and all host names.
