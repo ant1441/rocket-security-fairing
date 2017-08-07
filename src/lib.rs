@@ -107,6 +107,8 @@ static STRICT_TRANSPORT_SECURITY: &str = "Strict-Transport-Security";
 /// to add the relevant headers to responses.
 pub struct Security<'a> {
     enabled: bool, // [TODO]: Remove `enabled`
+    /// Force that this host is using SSL. Useful if used behind a Proxy.
+    force_ssl: bool,
     /// allowed_hosts is a list of fully qualified domain names that are allowed. Default is empty list, which allows any and all host names.
     allowed_hosts: Option<&'a [&'a str]>,
     /// host_proxy_headers is a set of header keys that may hold a proxied hostname value for the request.
@@ -150,6 +152,7 @@ impl<'a> Security<'a> {
     pub fn new() -> Self {
         Self {
             enabled: false,
+            force_ssl: false,
             allowed_hosts: None,
             host_proxy_headers: None,
             ssl_redirect: false,
@@ -196,7 +199,9 @@ impl Fairing for Security<'static> {
 
 impl<'a> Security<'a> {
     fn is_ssl(&self, request: &Request) -> bool {
-        if let Some(ref ssl_proxy_headers) = self.ssl_proxy_headers {
+        if self.force_ssl {
+            return true
+        } else if let Some(ref ssl_proxy_headers) = self.ssl_proxy_headers {
             let req_headers = request.headers();
             for (ssl_proxy_header, expected_value) in ssl_proxy_headers {
                 for value in req_headers.get(ssl_proxy_header) {
@@ -212,7 +217,7 @@ impl<'a> Security<'a> {
 
     // TODO: Need to dig into rocket to figure this one out
     fn rocket_is_ssl(&self, _request: &Request) -> bool {
-        true
+        false
     }
 
     /// Extract the given hostname from the request.

@@ -14,7 +14,7 @@ use common::create_client;
 
 #[test]
 fn test_no_hsts() {
-    let security = Security::new();
+    let security = Security::new().force_ssl();
     let client = create_client(security);
 
     let req = client.get("/");
@@ -28,7 +28,7 @@ fn test_no_hsts() {
 
 #[test]
 fn test_hsts() {
-    let security = Security::new().sts_seconds(256);
+    let security = Security::new().force_ssl().sts_seconds(256);
     let client = create_client(security);
 
     let req = client.get("/");
@@ -51,7 +51,10 @@ fn test_hsts() {
 
 #[test]
 fn test_hsts_subdomain() {
-    let security = Security::new().sts_seconds(256).sts_include_subdomains();
+    let security = Security::new()
+        .force_ssl()
+        .sts_seconds(256)
+        .sts_include_subdomains();
     let client = create_client(security);
 
     let req = client.get("/");
@@ -75,7 +78,10 @@ fn test_hsts_subdomain() {
 
 #[test]
 fn test_hsts_preload() {
-    let security = Security::new().sts_seconds(256).sts_preload();
+    let security = Security::new()
+        .force_ssl()
+        .sts_seconds(256)
+        .sts_preload();
     let client = create_client(security);
 
     let req = client.get("/");
@@ -100,6 +106,7 @@ fn test_hsts_preload() {
 #[test]
 fn test_hsts_preload_subdomain() {
     let security = Security::new()
+        .force_ssl()
         .sts_seconds(256)
         .sts_preload()
         .sts_include_subdomains();
