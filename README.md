@@ -1,5 +1,7 @@
 # rocket-security-fairing
 
+[![Build Status](https://travis-ci.org/ant1441/rocket-security-fairing.svg?branch=master)](https://travis-ci.org/ant1441/rocket-security-fairing)
+
 A fairing for the Rust web framework [Rocket](https://rocket.rs), inspired by the golang library [Secure](https://github.com/unrolled/secure).
 rocket-security-fairing allows you to enable various options to increase the security of your application.
 
